@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerController : MonoBehaviour
 {
@@ -6,10 +7,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private GameObject player;
     [SerializeField] private Camera cam;
     [SerializeField] private float Sensitivity;
-    
+
     [SerializeField] private float speed, walk, run, crouch;
+    [SerializeField] private float health;
 
     private Vector3 crouchScale, normalScale;
+    public Slider slider;
 
     public bool isMoving, isCrouching, isRunning;
 
@@ -72,5 +75,34 @@ public class PlayerController : MonoBehaviour
         // Detects if the player is moving.
         // Useful if you want footstep sounds and or other features in your game.
         isMoving = cc.velocity.sqrMagnitude > 0.0f ? true : false;
+    }
+
+    // object collision stuff, subtracts health when colliding
+    void OnCollisionEnter(Collision collision)
+    {
+        Rigidbody rb = GetComponent<Rigidbody>();
+        Vector3 v = rb.velocity;
+        if (v.y == 0)
+        {
+            if ((collision.contacts[0].point.y != 0))
+            {
+                foreach (ContactPoint contact in collision.contacts)
+                {
+                    Debug.DrawRay(contact.point, contact.normal, Color.white);
+                }
+                health -= v.magnitude;
+                slider.value = health;
+            }
+        }
+        else
+        {
+            foreach (ContactPoint contact in collision.contacts)
+            {
+                Debug.DrawRay(contact.point, contact.normal, Color.white);
+            }
+            health -= v.magnitude;
+            slider.value = health;
+            rb.velocity = -rb.velocity;
+        }
     }
 }
